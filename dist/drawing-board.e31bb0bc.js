@@ -4865,6 +4865,7 @@ let DrawingBoard = class DrawingBoard extends lit_element_1.LitElement {
 
   firstUpdated() {
     if (typeof window.orientation !== "undefined" || navigator.userAgent.indexOf('IEMobile') !== -1) {
+      this.stroke = 20;
       this.brushes = [20, 30, 40, 50, 60, 70, 80, 90];
       this.requestUpdate();
     }
@@ -5026,9 +5027,10 @@ let DrawingBoard = class DrawingBoard extends lit_element_1.LitElement {
   draw(e) {
     e.preventDefault();
     e.stopPropagation();
-    const target = e.touches[0].target;
-    this.newX = target.pageX - target.offsetLeft;
-    this.newY = target.pageY - target.offsetTop;
+    const target = e.touches[0];
+    console.log(target);
+    this.newX = target.pageX - e.target.offsetLeft;
+    this.newY = target.pageY - e.target.offsetTop;
     this.ctx.lineTo(this.newX, this.newY);
     this.ctx.strokeStyle = this.color;
     this.ctx.lineWidth = this.stroke;
@@ -5092,7 +5094,7 @@ __decorate([lit_element_1.property({
 }), __metadata("design:type", typeof (_a = typeof data_types_1.pointObject !== "undefined" && data_types_1.pointObject) === "function" ? _a : Object)], DrawingBoard.prototype, "lastPoint", void 0);
 
 __decorate([lit_element_1.property({
-  ttribute: false
+  attribute: false
 }), __metadata("design:type", typeof (_b = typeof Array !== "undefined" && Array) === "function" ? _b : Object)], DrawingBoard.prototype, "points", void 0);
 
 __decorate([lit_element_1.property({
@@ -5195,7 +5197,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "58744" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "61847" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

@@ -121,6 +121,7 @@ export class DrawingBoard extends LitElement {
 
     firstUpdated(){
         if((typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1)){
+            this.stroke = 20;
             this.brushes = [20, 30, 40, 50, 60, 70, 80, 90];
             this.requestUpdate();
         }
@@ -281,9 +282,10 @@ export class DrawingBoard extends LitElement {
     draw(e: TouchEvent) {
         e.preventDefault();
         e.stopPropagation();
-        const target = e.touches[0].target as HTMLCanvasElement;
-        this.newX = target.pageX - target.offsetLeft;
-        this.newY = target.pageY - target.offsetTop;
+        const target = e.touches[0] as HTMLElement;
+        console.log(target);
+        this.newX = target.pageX - e.target.offsetLeft;
+        this.newY = target.pageY - e.target.offsetTop;
         this.ctx.lineTo(this.newX, this.newY);
         this.ctx.strokeStyle = this.color;
         this.ctx.lineWidth = this.stroke as number;
