@@ -1,0 +1,19 @@
+{
+  "name": "pdf-editor",
+  "version": "1.0.0",
+  "description": "A script for drawing on canvas",
+  "main": "index.js",
+  "scripts": {
+    "test": "test",
+    "watch": "parcel index.html",
+    "build": "parcel build index.html"
+  },
+  "author": "Anastazja Galuza",
+  "license": "ISC",
+  "dependencies": {
+    "img": "^3.0.3",
+    "lit-element": "^2.3.1",
+    "parcel-bundler": "^1.12.4"
+  },
+  "devDependencies": {}
+}
