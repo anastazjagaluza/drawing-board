@@ -106,7 +106,7 @@ export class DrawingBoard extends LitElement {
     // Declaring all the variables, that will be used, including their types and default values
 
     @property({attribute: false}) lastPoint: pointObject;
-    @property({ ttribute: false}) points: Array<pointObject> = [];
+    @property({ attribute: false}) points: Array<pointObject> = [];
     @property({type: Array, attribute: false}) brushes = [1, 2, 3, 4, 5, 6, 7, 8, 9];
     @property({type: Array, attribute: false}) colors = ["#ff8888", "#ffdda8", "#f9ff93", "#d5ffb5", "#b3fdff", "purple", "black", "white"];
     @property({type: Number, attribute: false}) prevX: number;
