@@ -4714,33 +4714,61 @@ try {
 
 },{}],"img/tiny-brush1.png":[function(require,module,exports) {
 module.exports = "/tiny-brush1.ee9de1e5.png";
-},{}],"drawing-board.js":[function(require,module,exports) {
+},{}],"data-types.ts":[function(require,module,exports) {
 "use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+},{}],"drawing-board.ts":[function(require,module,exports) {
+"use strict";
+
+var __decorate = this && this.__decorate || function (decorators, target, key, desc) {
+  var c = arguments.length,
+      r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc,
+      d;
+  if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+  return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+
+var __metadata = this && this.__metadata || function (k, v) {
+  if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+
+var __importDefault = this && this.__importDefault || function (mod) {
+  return mod && mod.__esModule ? mod : {
+    "default": mod
+  };
+};
+
+var _a, _b, _c, _d;
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.DrawingBoard = void 0;
 
-var _litElement = require("lit-element");
+const lit_element_1 = require("lit-element");
 
 require("regenerator-runtime/runtime");
 
-var _tinyBrush = _interopRequireDefault(require("./img/tiny-brush1.png"));
+const tiny_brush1_png_1 = __importDefault(require("./img/tiny-brush1.png"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+const data_types_1 = require("./data-types");
 
-class DrawingBoard extends _litElement.LitElement {
-  static get properties() {
-    return {
-      loaded: {
-        type: Boolean
-      }
-    };
+let DrawingBoard = class DrawingBoard extends lit_element_1.LitElement {
+  constructor() {
+    super(...arguments);
+    this.points = [];
+    this.brushes = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+    this.colors = ["#ff8888", "#ffdda8", "#f9ff93", "#d5ffb5", "#b3fdff", "purple", "black", "white"];
+    this.color = "black";
+    this.background = "white";
+    this.stroke = 1;
   }
 
   static get styles() {
-    return (0, _litElement.css)`
+    return lit_element_1.css`
             :host{
                 display: flex;
                 flex-direction: column;
@@ -4761,7 +4789,7 @@ class DrawingBoard extends _litElement.LitElement {
             canvas {
                 background-color: white;
                 z-index: 1;
-                cursor: url(${(0, _litElement.unsafeCSS)(_tinyBrush.default)}), default;
+                cursor: url(${lit_element_1.unsafeCSS(tiny_brush1_png_1.default)}), default;
         }
         .colors, .backgrounds, .brush {
             border: 2px solid transparent;
@@ -4835,66 +4863,53 @@ class DrawingBoard extends _litElement.LitElement {
 `;
   }
 
-  constructor() {
-    super();
-    this.canvas;
-    this.prevX;
-    this.prevY;
-    this.newX;
-    this.newY;
-    this.ctx;
-    this.color = "black";
-    this.background = "white";
-    this.stroke = 1;
-    this.colors = ["#ff8888", "#ffdda8", "#f9ff93", "#d5ffb5", "#b3fdff", "purple", "black", "white"];
-    this.brushes = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-    this.points = [];
-    this.lastPoint;
-  }
-
   firstUpdated() {
-    super.firstUpdated();
-
     if (typeof window.orientation !== "undefined" || navigator.userAgent.indexOf('IEMobile') !== -1) {
       this.brushes = [20, 30, 40, 50, 60, 70, 80, 90];
       this.requestUpdate();
     }
 
-    console.log(this.brushes);
     this.canvas = this.shadowRoot.querySelector("canvas");
     this.canvas.style.backgroundColor = this.background;
     this.ctx = this.canvas.getContext("2d");
     this.canvas.width = window.innerWidth * 0.7;
     this.canvas.height = window.innerHeight * 0.7;
-  }
+  } // Setting a new brush color
+
 
   pickColor(e) {
+    const target = e.target;
     Array.from(this.shadowRoot.querySelectorAll(".colors")).map(el => {
       el.classList.remove("active");
     });
-    e.target.classList.add("active");
-    this.color = e.target.value;
+    target.classList.add("active");
+    this.color = target.value;
     this.requestUpdate();
-  }
+  } // Setting a new background color
+
 
   pickBg(e) {
+    const target = e.target;
     Array.from(this.shadowRoot.querySelectorAll(".backgrounds")).map(el => {
       el.classList.remove("active");
     });
-    e.target.classList.add("active");
-    this.background = e.target.value;
+    target.classList.add("active");
+    this.background = target.value;
     this.canvas.style.backgroundColor = this.background;
     this.requestUpdate();
-  }
+  } // Setting a new brush size
+
 
   pickBrush(e) {
+    const target = e.target;
     Array.from(this.shadowRoot.querySelectorAll(".brush")).map(el => {
       el.style.borderColor = "transparent";
     });
-    e.target.style.borderColor = "black";
-    this.stroke = e.target.value;
+    target.style.borderColor = "black";
+    this.stroke = target.value;
     this.requestUpdate();
-  }
+  } // Start tracking the event if the user is on the desktop
+
 
   trackMouse(e) {
     this.prevX = e.offsetX;
@@ -4909,25 +4924,27 @@ class DrawingBoard extends _litElement.LitElement {
       mode: "begin"
     });
     this.canvas.onmousemove = this.drawMouse.bind(this);
-  }
+  } // Start tracking the event if the user is on mobile
+
 
   track(e) {
+    const target = e.touches[0].target;
     e.preventDefault();
     e.stopPropagation();
-    this.prevX = e.touches[0].pageX - e.touches[0].target.offsetLeft;
-    this.prevY = e.touches[0].pageY - e.touches[0].target.offsetTop;
-    ;
+    this.prevX = e.touches[0].pageX - target.offsetLeft;
+    this.prevY = e.touches[0].pageY - target.offsetTop;
     this.ctx.beginPath();
     this.ctx.moveTo(this.prevX, this.prevY);
     this.points.push({
-      x: e.offsetX,
-      y: e.offsetY,
+      x: e.touches[0].pageX - target.offsetLeft,
+      y: e.touches[0].pageX - target.offsetTop,
       stroke: this.stroke,
       color: this.color,
       mode: "begin"
     });
     this.canvas.ontouchmove = this.draw.bind(this);
-  }
+  } // Stop tracking the movements if the user is on the desktop
+
 
   stopMouse() {
     this.canvas.onmousemove = null;
@@ -4939,7 +4956,8 @@ class DrawingBoard extends _litElement.LitElement {
       mode: "end"
     });
     this.requestUpdate();
-  }
+  } // Stop tracking the movements if the user is on the mobile
+
 
   stop() {
     this.points.push({
@@ -4951,19 +4969,22 @@ class DrawingBoard extends _litElement.LitElement {
     });
     this.canvas.ontouchmove = null;
     this.requestUpdate();
-  }
+  } // Undo function removes the last added drawing point
+
 
   undo() {
     if (this.points.length > 0) {
       this.lastPoint = this.points.pop();
       this.drawAll();
     }
-  }
+  } // Redo function places back the last removed drawing point
+
 
   redo() {
     this.points.unshift(this.lastPoint);
     this.drawAll();
-  }
+  } // Redraw all the saved points after undoing or redoing
+
 
   drawAll() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -4983,7 +5004,8 @@ class DrawingBoard extends _litElement.LitElement {
 
     console.log(this.points);
     this.requestUpdate();
-  }
+  } // Tracking the mouse movements and drawing accordingly
+
 
   drawMouse(e) {
     this.newX = e.offsetX;
@@ -5004,13 +5026,15 @@ class DrawingBoard extends _litElement.LitElement {
   draw(e) {
     e.preventDefault();
     e.stopPropagation();
-    this.newX = e.touches[0].pageX - e.touches[0].target.offsetLeft;
-    this.newY = e.touches[0].pageY - e.touches[0].target.offsetTop;
+    const target = e.touches[0].target;
+    this.newX = target.pageX - target.offsetLeft;
+    this.newY = target.pageY - target.offsetTop;
     this.ctx.lineTo(this.newX, this.newY);
     this.ctx.strokeStyle = this.color;
     this.ctx.lineWidth = this.stroke;
     this.ctx.stroke();
-  }
+  } // If the user wants to clear the canvas, first ask user to confirm
+
 
   clear() {
     if (window.confirm("Are you sure you want to delete your masterpiece?")) {
@@ -5019,7 +5043,8 @@ class DrawingBoard extends _litElement.LitElement {
       this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
       this.requestUpdate();
     }
-  }
+  } // Trigger download of the canvas image
+
 
   save() {
     const link = this.shadowRoot.querySelector('#link');
@@ -5028,27 +5053,27 @@ class DrawingBoard extends _litElement.LitElement {
   }
 
   render() {
-    return (0, _litElement.html)`
+    return lit_element_1.html`
         <div id="top">
             <h1>Draw a masterpiece!</h1>
         </div>
         <div id="middle">
         <div id="backgrounds">
             ${this.colors.map(color => {
-      return (0, _litElement.html)`<button value="${color}" class="${this.background === color ? `active backgrounds` : `backgrounds`}" @click="${this.pickBg}" style="background-color: ${color}"></button>`;
+      return lit_element_1.html`<button value="${color}" class="${this.background === color ? `active backgrounds` : `backgrounds`}" @click="${this.pickBg}" style="background-color: ${color}"></button>`;
     })}
        <button class="un" @click="${this.undo}"> &larr;</button>
     </div>
     <div id="colors">
         ${this.colors.map(color => {
-      return (0, _litElement.html)`<button value="${color}" class="colors" @click="${this.pickColor}" style="background-color: ${color}"></button>`;
+      return lit_element_1.html`<button value="${color}" class="colors" @click="${this.pickColor}" style="background-color: ${color}"></button>`;
     })}
             <button class='un' @click="${this.redo}"> &rarr;</button>
         </div>
         <canvas @touchstart="${this.track}" @mousedown="${this.trackMouse}" @mouseup="${this.stopMouse}"  @touchend="${this.stop}"></canvas>
         <div id="strokes">
         ${this.brushes.map(brush => {
-      return (0, _litElement.html)`<button value="${brush}" class="brush" @click="${this.pickBrush}" style="width: 1.${brush}9rem; height: 1.${brush}9rem; background-color: ${this.color}"></button>`;
+      return lit_element_1.html`<button value="${brush}" class="brush" @click="${this.pickBrush}" style="width: 1.${brush}9rem; height: 1.${brush}9rem; background-color: ${this.color}"></button>`;
     })}
         </div>
         </div>
@@ -5060,18 +5085,78 @@ class DrawingBoard extends _litElement.LitElement {
         `;
   }
 
-}
+};
 
+__decorate([lit_element_1.property({
+  attribute: false
+}), __metadata("design:type", typeof (_a = typeof data_types_1.pointObject !== "undefined" && data_types_1.pointObject) === "function" ? _a : Object)], DrawingBoard.prototype, "lastPoint", void 0);
+
+__decorate([lit_element_1.property({
+  ttribute: false
+}), __metadata("design:type", typeof (_b = typeof Array !== "undefined" && Array) === "function" ? _b : Object)], DrawingBoard.prototype, "points", void 0);
+
+__decorate([lit_element_1.property({
+  type: Array,
+  attribute: false
+}), __metadata("design:type", Object)], DrawingBoard.prototype, "brushes", void 0);
+
+__decorate([lit_element_1.property({
+  type: Array,
+  attribute: false
+}), __metadata("design:type", Object)], DrawingBoard.prototype, "colors", void 0);
+
+__decorate([lit_element_1.property({
+  type: Number,
+  attribute: false
+}), __metadata("design:type", Number)], DrawingBoard.prototype, "prevX", void 0);
+
+__decorate([lit_element_1.property({
+  type: Number,
+  attribute: false
+}), __metadata("design:type", Number)], DrawingBoard.prototype, "prevY", void 0);
+
+__decorate([lit_element_1.property({
+  type: Number,
+  attribute: false
+}), __metadata("design:type", Number)], DrawingBoard.prototype, "newX", void 0);
+
+__decorate([lit_element_1.property({
+  type: Number,
+  attribute: false
+}), __metadata("design:type", Number)], DrawingBoard.prototype, "newY", void 0);
+
+__decorate([lit_element_1.property({
+  type: String,
+  attribute: false
+}), __metadata("design:type", String)], DrawingBoard.prototype, "color", void 0);
+
+__decorate([lit_element_1.property({
+  type: String,
+  attribute: false
+}), __metadata("design:type", String)], DrawingBoard.prototype, "background", void 0);
+
+__decorate([lit_element_1.property({
+  attribute: false
+}), __metadata("design:type", Object)], DrawingBoard.prototype, "stroke", void 0);
+
+__decorate([lit_element_1.property({
+  attribute: false
+}), __metadata("design:type", typeof (_c = typeof HTMLCanvasElement !== "undefined" && HTMLCanvasElement) === "function" ? _c : Object)], DrawingBoard.prototype, "canvas", void 0);
+
+__decorate([lit_element_1.property({
+  attribute: false
+}), __metadata("design:type", typeof (_d = typeof CanvasRenderingContext2D !== "undefined" && CanvasRenderingContext2D) === "function" ? _d : Object)], DrawingBoard.prototype, "ctx", void 0);
+
+DrawingBoard = __decorate([lit_element_1.customElement('drawing-board')], DrawingBoard);
 exports.DrawingBoard = DrawingBoard;
-customElements.define("drawing-board", DrawingBoard);
-},{"lit-element":"node_modules/lit-element/lit-element.js","regenerator-runtime/runtime":"node_modules/regenerator-runtime/runtime.js","./img/tiny-brush1.png":"img/tiny-brush1.png"}],"index.js":[function(require,module,exports) {
+},{"lit-element":"node_modules/lit-element/lit-element.js","regenerator-runtime/runtime":"node_modules/regenerator-runtime/runtime.js","./img/tiny-brush1.png":"img/tiny-brush1.png","./data-types":"data-types.ts"}],"index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _drawingBoard = require("./drawing-board.js");
+var _drawingBoard = require("./drawing-board.ts");
 
 Object.keys(_drawingBoard).forEach(function (key) {
   if (key === "default" || key === "__esModule") return;
@@ -5082,7 +5167,7 @@ Object.keys(_drawingBoard).forEach(function (key) {
     }
   });
 });
-},{"./drawing-board.js":"drawing-board.js"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"./drawing-board.ts":"drawing-board.ts"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -5110,7 +5195,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56927" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "58744" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

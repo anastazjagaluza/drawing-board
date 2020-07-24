@@ -1,1 +1,1 @@
-export * from "./drawing-board.js";
+export * from "./drawing-board.ts";

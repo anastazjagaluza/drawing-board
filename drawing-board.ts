@@ -1,17 +1,11 @@
-import { html, LitElement, css, unsafeCSS } from "lit-element";
+import { html, LitElement, css, unsafeCSS, property, customElement } from "lit-element";
 import 'regenerator-runtime/runtime'
 import TinyBrushAction from "./img/tiny-brush1.png";
+import { pointObject } from "./data-types";
 
-export class DrawingBoard extends LitElement{
 
-    static get properties(){
-        return {
-            loaded: {
-                type: Boolean
-            }
-        }
-    }
-
+@customElement('drawing-board')
+export class DrawingBoard extends LitElement {
     
     static get styles(){
         return css `
@@ -107,66 +101,72 @@ export class DrawingBoard extends LitElement{
             }
         }
 `
-    }
+    }   
 
-    constructor(){
-        super();
-        this.canvas;
-        this.prevX;
-        this.prevY;
-        this.newX;
-        this.newY;
-        this.ctx;
-        this.color = "black";
-        this.background = "white";
-        this.stroke = 1;
-        this.colors = ["#ff8888", "#ffdda8", "#f9ff93", "#d5ffb5", "#b3fdff", "purple", "black", "white"];
-        this.brushes = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-        this.points = [];
-        this.lastPoint;
-    }
+    // Declaring all the variables, that will be used, including their types and default values
+
+    @property({attribute: false}) lastPoint: pointObject;
+    @property({ ttribute: false}) points: Array<pointObject> = [];
+    @property({type: Array, attribute: false}) brushes = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+    @property({type: Array, attribute: false}) colors = ["#ff8888", "#ffdda8", "#f9ff93", "#d5ffb5", "#b3fdff", "purple", "black", "white"];
+    @property({type: Number, attribute: false}) prevX: number;
+    @property({type: Number, attribute: false}) prevY: number;
+    @property({type: Number, attribute: false}) newX: number;
+    @property({type: Number, attribute: false}) newY: number;
+    @property({type: String, attribute: false}) color: string = "black";
+    @property({type: String, attribute: false}) background: string = "white";
+    @property({attribute: false}) stroke: string | number = 1;
+    @property({attribute: false}) canvas: HTMLCanvasElement;
+    @property({attribute: false}) ctx: CanvasRenderingContext2D;
+
     firstUpdated(){
-        super.firstUpdated();
         if((typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1)){
             this.brushes = [20, 30, 40, 50, 60, 70, 80, 90];
             this.requestUpdate();
         }
-        console.log(this.brushes);
         this.canvas = this.shadowRoot.querySelector("canvas");
         this.canvas.style.backgroundColor = this.background;
         this.ctx = this.canvas.getContext("2d");
         this.canvas.width = window.innerWidth * 0.7;
         this.canvas.height = window.innerHeight * 0.7;
     }
-    
-    pickColor(e) {
+
+    // Setting a new brush color
+    pickColor(e: CustomEvent) {
+        const target = e.target as HTMLButtonElement;
         Array.from(this.shadowRoot.querySelectorAll(".colors")).map(el => {
             el.classList.remove("active");
-        })
-        e.target.classList.add("active");
-        this.color = e.target.value;
+        });
+        target.classList.add("active");
+        this.color = target.value;
         this.requestUpdate();
     }
-    pickBg(e) {
+
+    // Setting a new background color
+    pickBg(e: CustomEvent) {
+        const target = e.target as HTMLButtonElement;
         Array.from(this.shadowRoot.querySelectorAll(".backgrounds")).map(el => {
             el.classList.remove("active");
         })
-        e.target.classList.add("active");
-        this.background = e.target.value;
+        target.classList.add("active");
+        this.background = target.value;
         this.canvas.style.backgroundColor = this.background;
         this.requestUpdate();
     }
     
-    pickBrush(e) {        
-        Array.from(this.shadowRoot.querySelectorAll(".brush")).map(el => {
-            el.style.borderColor = "transparent";
-        })
-        e.target.style.borderColor = "black";
-        this.stroke = e.target.value;
+    // Setting a new brush size
+    pickBrush(e: CustomEvent) {  
+        const target = e.target as HTMLButtonElement;      
+        Array.from(this.shadowRoot.querySelectorAll(".brush")).map((el: HTMLButtonElement) => {
+            el.style.borderColor = "transparent"
+        });
+        target.style.borderColor = "black";
+        this.stroke = target.value;
         this.requestUpdate();
     }
 
-    trackMouse(e) {
+    // Start tracking the event if the user is on the desktop
+    trackMouse(e: MouseEvent) {
         this.prevX = e.offsetX;
         this.prevY = e.offsetY;
         this.ctx.beginPath();
@@ -181,16 +181,18 @@ export class DrawingBoard extends LitElement{
         this.canvas.onmousemove = this.drawMouse.bind(this);
     }
     
-    track(e){
+     // Start tracking the event if the user is on mobile
+    track(e: TouchEvent){
+        const target = e.touches[0].target as  HTMLCanvasElement;
         e.preventDefault();
         e.stopPropagation();
-        this.prevX = e.touches[0].pageX - e.touches[0].target.offsetLeft;
-        this.prevY = e.touches[0].pageY - e.touches[0].target.offsetTop;;
+        this.prevX = e.touches[0].pageX - target.offsetLeft;
+        this.prevY = e.touches[0].pageY - target.offsetTop!;
         this.ctx.beginPath();
         this.ctx.moveTo(this.prevX, this.prevY);
         this.points.push({
-            x: e.offsetX,
-            y: e.offsetY,
+            x: e.touches[0].pageX - target.offsetLeft,
+            y: e.touches[0].pageX - target.offsetTop,
             stroke: this.stroke,
             color: this.color,
             mode: "begin"
@@ -198,6 +200,7 @@ export class DrawingBoard extends LitElement{
         this.canvas.ontouchmove = this.draw.bind(this);
     }
 
+     // Stop tracking the movements if the user is on the desktop
     stopMouse(){
         this.canvas.onmousemove = null;
         this.points.push({
@@ -209,7 +212,7 @@ export class DrawingBoard extends LitElement{
         });
         this.requestUpdate();
     }
-    
+     // Stop tracking the movements if the user is on the mobile
     stop(){
         this.points.push({
             x: this.newX,
@@ -222,6 +225,7 @@ export class DrawingBoard extends LitElement{
         this.requestUpdate();
     }
 
+     // Undo function removes the last added drawing point
     undo(){
         if(this.points.length > 0){
         this.lastPoint = this.points.pop();
@@ -229,11 +233,13 @@ export class DrawingBoard extends LitElement{
         }
     }
     
+    // Redo function places back the last removed drawing point
     redo(){
         this.points.unshift(this.lastPoint);
         this.drawAll();
     }
 
+    // Redraw all the saved points after undoing or redoing
     drawAll(){
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         for(const point of this.points) {
@@ -244,7 +250,7 @@ export class DrawingBoard extends LitElement{
             else if(point.mode == "draw"){
             this.ctx.lineTo(point.x, point.y);
             this.ctx.strokeStyle = point.color;
-            this.ctx.lineWidth = point.stroke;
+            this.ctx.lineWidth = point.stroke as number;
             }
             else if(point.mode == "end"){
             this.ctx.stroke();
@@ -254,12 +260,13 @@ export class DrawingBoard extends LitElement{
         this.requestUpdate();
     }
     
-    drawMouse(e) {
+    // Tracking the mouse movements and drawing accordingly
+    drawMouse(e: MouseEvent) {
         this.newX = e.offsetX;
         this.newY = e.offsetY;
         this.ctx.lineTo(this.newX, this.newY);
         this.ctx.strokeStyle = this.color;
-        this.ctx.lineWidth = this.stroke;
+        this.ctx.lineWidth = this.stroke as number;
         this.ctx.stroke();
         this.points.push({
             x: e.offsetX,
@@ -271,17 +278,19 @@ export class DrawingBoard extends LitElement{
        
     }
 
-    draw(e) {
+    draw(e: TouchEvent) {
         e.preventDefault();
         e.stopPropagation();
-        this.newX = e.touches[0].pageX - e.touches[0].target.offsetLeft;
-        this.newY = e.touches[0].pageY - e.touches[0].target.offsetTop;
+        const target = e.touches[0].target as HTMLCanvasElement;
+        this.newX = target.pageX - target.offsetLeft;
+        this.newY = target.pageY - target.offsetTop;
         this.ctx.lineTo(this.newX, this.newY);
         this.ctx.strokeStyle = this.color;
-        this.ctx.lineWidth = this.stroke;
+        this.ctx.lineWidth = this.stroke as number;
         this.ctx.stroke();
     }
 
+    // If the user wants to clear the canvas, first ask user to confirm
     clear(){
         if(window.confirm("Are you sure you want to delete your masterpiece?")){
             this.background = "white";
@@ -291,6 +300,7 @@ export class DrawingBoard extends LitElement{
         }
     }
 
+    // Trigger download of the canvas image
     save(){
         const link = this.shadowRoot.querySelector('#link');
         link.setAttribute('download', 'My Masterpiece.png');
@@ -328,4 +338,3 @@ export class DrawingBoard extends LitElement{
       
         `
 }}
-customElements.define("drawing-board", DrawingBoard);
